@@ -17,7 +17,7 @@ Laeuft auf Android, iPhone und PC, ohne App Store und ohne kostenpflichtige Apps
    Danach laeuft es automatisch ca. alle 4 Stunden.
 
 Die App ist dann erreichbar unter:
-https://pyro-ak.github.io/schach-top5/
+https://pyro-ak.github.io/vibe-code-pwa-schach/
 
 ## Auf dem Handy installieren
 
