@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Top 5 Schachspielerinnen</title>
+<meta name="description" content="Die 5 Schachspielerinnen mit der hoechsten Live-Elo laut 2700chess.com">
+<meta name="theme-color" content="#E0CFB1">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+  :root {
+    --light: #F3EADB;
+    --dark: #E0CFB1;
+    --text: #2B2118;
+    --sub: #6B5A48;
+    --accent: #8A5A2B;
+    --square: 56px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    background-color: var(--light);
+    background-image: conic-gradient(var(--dark) 25%, var(--light) 0 50%, var(--dark) 0 75%, var(--light) 0);
+    background-size: calc(var(--square) * 2) calc(var(--square) * 2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.55);
+    border-radius: 22px;
+    padding: 20px 20px 14px;
+    box-shadow: 0 6px 24px rgba(43, 33, 24, 0.12);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+  h1 { font-size: 20px; margin: 0; font-weight: 700; }
+  .sub { font-size: 12px; color: var(--sub); margin-top: 2px; }
+  ol { list-style: none; margin: 16px 0 10px; padding: 0; }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(107, 90, 72, 0.18);
+    font-size: 16px;
+  }
+  li:last-child { border-bottom: 0; }
+  .rank { color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; width: 1.6em; }
+  .name { flex: 1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .elo { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--sub);
+  }
+  .foot a { color: var(--sub); }
+  .msg { font-size: 14px; padding: 14px 0; color: var(--sub); }
+</style>
+</head>
+<body>
+  <main class="card">
+    <h1>Top 5 Schachspielerinnen</h1>
+    <div class="sub">Live-Elo &nbsp;|&nbsp; 2700chess.com</div>
+    <ol id="list"><li class="msg">Lade Daten ...</li></ol>
+    <div class="foot">
+      <span id="stand">Stand: -</span>
+      <a href="https://2700chess.com/women" target="_blank" rel="noopener">Zur Quelle</a>
+    </div>
+  </main>
+
+<script>
+  const REFRESH_MS = 4 * 60 * 60 * 1000;
+  const CACHE_KEY = "top5_women_chess";
+
+  function fmtRating(r) {
+    return Number.isInteger(r) ? String(r) : Number(r).toFixed(1);
+  }
+
+  function fmtTime(iso) {
+    if (!iso) return "-";
+    const d = new Date(iso);
+    const p = n => String(n).padStart(2, "0");
+    return `${p(d.getDate())}.${p(d.getMonth() + 1)}. ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+
+  function render(data, fromCache) {
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+    if (!data || !data.players || data.players.length === 0) {
+      list.innerHTML = '<li class="msg">Daten konnten nicht geladen werden.</li>';
+      return;
+    }
+    data.players.slice(0, 5).forEach((p, i) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="rank">${i + 1}.</span><span class="name"></span><span class="elo">${fmtRating(p.rating)}</span>`;
+      li.querySelector(".name").textContent = p.name;
+      list.appendChild(li);
+    });
+    document.getElementById("stand").textContent =
+      "Stand: " + fmtTime(data.updated) + (fromCache ? " (Cache)" : "");
+  }
+
+  function readCache() {
+    try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (e) { return null; }
+  }
+  function writeCache(data) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (e) {}
+  }
+
+  async function load() {
+    try {
+      const res = await fetch("data.json?t=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      if (!data.players || data.players.length < 5) throw new Error("leer");
+      writeCache(data);
+      render(data, false);
+    } catch (e) {
+      const cached = readCache();
+      render(cached, true);
+    }
+  }
+
+  const cached = readCache();
+  if (cached) render(cached, true);
+  load();
+  setInterval(load, REFRESH_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") load();
+  });
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+</script>
+</body>
+</html>

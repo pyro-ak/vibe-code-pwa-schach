@@ -1,0 +1,17 @@
+{
+  "name": "Top 5 Schachspielerinnen",
+  "short_name": "Schach Top 5",
+  "description": "Die 5 Schachspielerinnen mit der hoechsten Live-Elo laut 2700chess.com",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F3EADB",
+  "theme_color": "#E0CFB1",
+  "lang": "de",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
